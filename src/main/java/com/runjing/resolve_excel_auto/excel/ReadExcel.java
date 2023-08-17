@@ -97,4 +97,17 @@ public class ReadExcel {
             default -> "varchar(16) default null";
         };
     }
+
+    private static String getValueSqlString(Cell dataCell){
+        return switch (dataCell.getCellType().getCode()) {
+            case 0 -> String.valueOf(dataCell.getNumericCellValue());
+            case 2 -> dataCell.getStringCellValue();
+            case 3 -> dataCell.getCellFormula();
+            case 4 -> transferBool(dataCell.getBooleanCellValue());
+            default -> "null";
+        };
+    }
+    private static String transferBool(Boolean arg1){
+        return arg1?"0":"1";
+    }
 }
