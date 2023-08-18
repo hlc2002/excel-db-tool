@@ -1,0 +1,7 @@
+server:
+  port: 9876
+jdbcConfig:
+  driver: com.mysql.cj.jdbc.Driver
+  url: jdbc:mysql://172.16.3.170:3306/test
+  userName: huanglinchun
+  password: SpyhDE5txzWIHfcjOl3u

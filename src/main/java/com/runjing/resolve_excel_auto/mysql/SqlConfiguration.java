@@ -1,6 +1,9 @@
 package com.runjing.resolve_excel_auto.mysql;
 
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 /**
  * @author : forestSpringH
@@ -9,7 +12,12 @@ import org.springframework.context.annotation.Configuration;
  * @modified By:
  * @project: resolve_excel_auto
  */
-@Configuration
+@Component("SqlConfiguration")
+@ConfigurationProperties(prefix = "jdbc-config")
+@Data
 public class SqlConfiguration {
-
+    private String driver;
+    private String url;
+    private String userName;
+    private String password;
 }

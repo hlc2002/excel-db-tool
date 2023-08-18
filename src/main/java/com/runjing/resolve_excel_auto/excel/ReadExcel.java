@@ -83,9 +83,10 @@ public class ReadExcel {
 
     /**
      * 获取行数与对应行得值SQL实体列表
-     * @param workbook 工作薄对象
+     *
+     * @param workbook         工作薄对象
      * @param columnEntityList 列信息对象
-     * @return map<行号，行内每一个单元格得值SQL实体列表>
+     * @return map<行号 ， 行内每一个单元格得值SQL实体列表>
      */
     public Map<Integer, List<ValueEntity>> getExcelRowDataMap(Workbook workbook, List<ColumnEntity> columnEntityList) {
         Sheet sheet = workbook.getSheetAt(0);
@@ -123,18 +124,22 @@ public class ReadExcel {
             case 3 -> " varchar default null";
             case 4 -> " tinyint(1) default 0";
             default -> " varchar(16) default null";
-        }+",";
+        } + ",";
     }
 
     /*获取单元格值SQL*/
     private static String getValueSqlString(Cell dataCell) {
         return switch (dataCell.getCellType().getCode()) {
             case 0 -> String.valueOf(dataCell.getNumericCellValue());
-            case 2 -> dataCell.getStringCellValue();
-            case 3 -> dataCell.getCellFormula();
+            case 2 -> quotesHandle(dataCell.getStringCellValue());
+            case 3 -> quotesHandle(dataCell.getCellFormula());
             case 4 -> transferBool(dataCell.getBooleanCellValue());
             default -> "null";
         };
+    }
+
+    private static String quotesHandle(String fieldValue) {
+        return "'" + fieldValue + "'";
     }
 
     private static String transferBool(Boolean arg1) {

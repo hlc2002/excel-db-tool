@@ -1,8 +1,9 @@
 package com.runjing.resolve_excel_auto.mysql;
 
-
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import jakarta.annotation.Resource;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+
 
 /**
  * @author : forestSpringH
@@ -12,7 +13,11 @@ import org.springframework.stereotype.Service;
  * @project: resolve_excel_auto
  */
 @Service
-@ConditionalOnBean(SqlConnectionPool.class)
 public class SqlDataService {
+    @Resource
+    private JdbcTemplate jdbcTemplate;
 
+    public void executeSql(String sql){
+        jdbcTemplate.execute(sql);
+    }
 }

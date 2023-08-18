@@ -4,6 +4,7 @@ import com.runjing.resolve_excel_auto.basic.ColumnEntity;
 import com.runjing.resolve_excel_auto.basic.ValueEntity;
 import com.runjing.resolve_excel_auto.util.LanguageUtils;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -24,10 +25,10 @@ public class SqlSplicer {
      */
     public static StringBuffer spliceCreateTableSql(List<ColumnEntity> columnEntityList, String tableName) {
         StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append("CREATE TABLE ").append(quotesHandle(transferPinYin(tableName))).append(" ( `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自动生成主键，区分',");
+        stringBuffer.append("CREATE TABLE ").append(quotesHandle(transferPinYin(tableName))).append(" ( `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自动主键',");
         /*扫描属性列表，填充建表SQL*/
         stringBuffer.append(scanColumnListToSql(columnEntityList));
-        stringBuffer.append(" PRIMARY KEY (`id`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ");
+        stringBuffer.append(" PRIMARY KEY (`id`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; ");
         return stringBuffer;
     }
 
@@ -99,5 +100,23 @@ public class SqlSplicer {
         }
         stringBuffer.append(");");
         return stringBuffer.toString();
+    }
+
+    public static void main(String[] args) {
+        List<ColumnEntity> columnEntityList = new LinkedList<>();
+        ColumnEntity column1 = new ColumnEntity();
+        column1.setColumnName("品类名称");
+        column1.setColumnSqlInfo(" varchar(16) default null ,");
+        columnEntityList.add(column1);
+        String tableName = "数据表测试";
+        StringBuffer stringBuffer = spliceCreateTableSql(columnEntityList, tableName);
+        System.out.println(stringBuffer);
+        List<ValueEntity> valueEntityList = new LinkedList<>();
+        ValueEntity value1 = new ValueEntity();
+        value1.setColumnName("品类名称");
+        value1.setValueOfString("啤酒");
+        valueEntityList.add(value1);
+        String s = scanValueListToSql(tableName, valueEntityList);
+        System.out.println(s);
     }
 }
