@@ -30,16 +30,19 @@ public class ExcelResolveController {
 
     @RequestMapping("/upload")
     @ResponseBody
-    public void uploadExcel(@RequestParam("fileName") MultipartFile file){
+    public void uploadExcel(@RequestParam("fileName") MultipartFile file) {
+
         List<ColumnEntity> excelColumnList = ReadExcel.getExcelColumnList(file);
         log.warn(excelColumnList.toString());
         StringBuffer stringBuffer = SqlSplicer.spliceCreateTableSql(excelColumnList, file.getName());
-//        service.executeSql(stringBuffer.toString());
-        log.warn("建表SQL：{}",stringBuffer);
+        log.warn("建表SQL：{}", stringBuffer);
+        service.executeSql(stringBuffer.toString());
+
         Map<Integer, List<ValueEntity>> excelRowDataMap = ReadExcel.getExcelRowDataMap(file, excelColumnList);
         log.warn(excelRowDataMap.toString());
         StringBuffer stringBuffer1 = SqlSplicer.spliceInsertValueSql(excelRowDataMap, file.getName());
-//        service.executeSql(stringBuffer1.toString());
-        log.warn("插值SQL：{}",stringBuffer1);
+        log.warn("插值SQL：{}", stringBuffer1);
+        service.executeSql(stringBuffer1.toString());
+
     }
 }
