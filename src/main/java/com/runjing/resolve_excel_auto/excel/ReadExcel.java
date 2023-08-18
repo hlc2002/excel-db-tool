@@ -20,7 +20,7 @@ import java.util.*;
  */
 @Slf4j
 public class ReadExcel {
-    private static Integer LIMIT_SCAN_NUM = 500 * 1000;
+    private static final Integer LIMIT_SCAN_NUM = 500 * 1000;
 
     /**
      * 根据文件名读取Excel文件获取列信息列表
