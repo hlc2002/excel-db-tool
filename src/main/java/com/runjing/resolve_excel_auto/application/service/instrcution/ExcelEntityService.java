@@ -1,5 +1,7 @@
 package com.runjing.resolve_excel_auto.application.service.instrcution;
 
+import org.springframework.web.multipart.MultipartFile;
+
 /**
  * @author : forestSpringH
  * @description:
@@ -8,4 +10,17 @@ package com.runjing.resolve_excel_auto.application.service.instrcution;
  * @project: resolve_excel_auto
  */
 public interface ExcelEntityService {
+    /**
+     * 创建数据表
+     *
+     * @param file 文件
+     */
+    void createTable(MultipartFile file);
+
+    /**
+     * 插入数据实体
+     *
+     * @param file 文件
+     */
+    void insertEntity(MultipartFile file);
 }

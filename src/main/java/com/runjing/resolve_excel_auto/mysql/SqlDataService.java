@@ -20,4 +20,8 @@ public class SqlDataService {
     public void executeSql(String sql){
         jdbcTemplate.execute(sql);
     }
+
+    public Object executeSqlAndGetReturn(String sql){
+        return jdbcTemplate.queryForObject(sql,Object.class);
+    }
 }
