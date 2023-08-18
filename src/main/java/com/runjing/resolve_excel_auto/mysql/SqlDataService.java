@@ -1,5 +1,9 @@
 package com.runjing.resolve_excel_auto.mysql;
 
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.stereotype.Service;
+
 /**
  * @author : forestSpringH
  * @description:
@@ -7,6 +11,8 @@ package com.runjing.resolve_excel_auto.mysql;
  * @modified By:
  * @project: resolve_excel_auto
  */
+@Service
+@ConditionalOnBean(SqlConnectionPool.class)
 public class SqlDataService {
 
 }

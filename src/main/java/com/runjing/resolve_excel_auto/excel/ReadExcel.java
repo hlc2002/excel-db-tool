@@ -1,6 +1,7 @@
 package com.runjing.resolve_excel_auto.excel;
 
 import com.runjing.resolve_excel_auto.basic.ColumnEntity;
+import com.runjing.resolve_excel_auto.basic.ValueEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,7 +22,9 @@ import java.util.*;
 @Slf4j
 public class ReadExcel {
 
-   private final static ColumnEntity COLUMN_ENTITY = new ColumnEntity();
+    private final static ColumnEntity COLUMN_ENTITY = new ColumnEntity();
+    private final static ValueEntity VALUE_ENTITY = new ValueEntity();
+    private final static Integer LIMIT_SCAN_NUM = 500 * 1000;
 
     /**
      * 根据文件名读取Excel文件获取列信息列表
@@ -33,7 +36,7 @@ public class ReadExcel {
         List<ColumnEntity> list = new LinkedList<>();
         InputStream is = null;
         try {
-            is = (FileInputStream)file.getInputStream();
+            is = (FileInputStream) file.getInputStream();
             Workbook workbook;
             workbook = WorkbookFactory.create(is);
             list = getExcelColumnList(workbook);
@@ -62,9 +65,9 @@ public class ReadExcel {
         Sheet dataSheet = workbook.getSheetAt(0);
         Row topRow = dataSheet.getRow(0);
         Row typeRow = dataSheet.getRow(1);
-        if (topRow.getPhysicalNumberOfCells() != typeRow.getPhysicalNumberOfCells()){
-           log.error("数据表列行与数据行列数不一致！退出解析，请整理数据表格式！");
-           throw new RuntimeException("DataSheet is error: com.runjing.resolve_excel_auto.excel.ReadExcel.getExcelColumnList(org.apache.poi.ss.usermodel.Workbook)");
+        if (topRow.getPhysicalNumberOfCells() != typeRow.getPhysicalNumberOfCells()) {
+            log.error("数据表列行与数据行列数不一致！退出解析，请整理数据表格式！");
+            throw new RuntimeException("DataSheet is error: com.runjing.resolve_excel_auto.excel.ReadExcel.getExcelColumnList(org.apache.poi.ss.usermodel.Workbook)");
         }
         List<ColumnEntity> columnEntityList = new LinkedList<>();
         for (int i = 0; i < topRow.getPhysicalNumberOfCells(); i++) {
@@ -78,9 +81,33 @@ public class ReadExcel {
         return columnEntityList;
     }
 
-    public Map<Long,List<ColumnEntity>> getExcelRowDataMap(){
-        return null;
+    /**
+     * 获取行数与对应行得值SQL实体列表
+     * @param workbook 工作薄对象
+     * @param columnEntityList 列信息对象
+     * @return map<行号，行内每一个单元格得值SQL实体列表>
+     */
+    public Map<Integer, List<ValueEntity>> getExcelRowDataMap(Workbook workbook, List<ColumnEntity> columnEntityList) {
+        Sheet sheet = workbook.getSheetAt(0);
+        int lastRowNum = sheet.getLastRowNum();
+        Map<Integer, List<ValueEntity>> map = new HashMap<>();
+        List<ValueEntity> list = new LinkedList<>();
+        if (lastRowNum <= LIMIT_SCAN_NUM) {
+            for (int i = 1; i < lastRowNum; i++) {
+                Row row = sheet.getRow(i);
+                for (int j = 0; j < row.getPhysicalNumberOfCells(); j++) {
+                    VALUE_ENTITY.setColumnName(columnEntityList.get(j).getColumnName());
+                    VALUE_ENTITY.setValueOfString(getValueSqlString(row.getCell(j)));
+                    list.add(VALUE_ENTITY);
+                    VALUE_ENTITY.clear();
+                }
+                map.put(i, list);
+                list.clear();
+            }
+        }
+        return map;
     }
+
     /**
      * 判断是否Excel格式是否为2003
      */
@@ -88,17 +115,19 @@ public class ReadExcel {
         return filePath.matches("^.+\\.(?i)(xls)$");
     }
 
-    private static String switchCellDataSqlInfo(Cell dataCell){
-       return switch (dataCell.getCellType().getCode()) {
-            case 0 -> "int default 0";
-            case 2 -> "varchar(32) default null";
-            case 3 -> "varchar default null";
-            case 4 -> "tinyint(1) default 0";
-            default -> "varchar(16) default null";
-        };
+    /*获取构建表格数据属性SQL*/
+    private static String switchCellDataSqlInfo(Cell dataCell) {
+        return switch (dataCell.getCellType().getCode()) {
+            case 0 -> " int default 0";
+            case 2 -> " varchar(32) default null";
+            case 3 -> " varchar default null";
+            case 4 -> " tinyint(1) default 0";
+            default -> " varchar(16) default null";
+        }+",";
     }
 
-    private static String getValueSqlString(Cell dataCell){
+    /*获取单元格值SQL*/
+    private static String getValueSqlString(Cell dataCell) {
         return switch (dataCell.getCellType().getCode()) {
             case 0 -> String.valueOf(dataCell.getNumericCellValue());
             case 2 -> dataCell.getStringCellValue();
@@ -107,7 +136,10 @@ public class ReadExcel {
             default -> "null";
         };
     }
-    private static String transferBool(Boolean arg1){
-        return arg1?"0":"1";
+
+    private static String transferBool(Boolean arg1) {
+        return arg1 ? "0" : "1";
     }
+
+
 }

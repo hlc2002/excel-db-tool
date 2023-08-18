@@ -1,5 +1,7 @@
 package com.runjing.resolve_excel_auto.mysql;
 
+import org.springframework.context.annotation.Configuration;
+
 /**
  * @author : forestSpringH
  * @description:
@@ -7,5 +9,7 @@ package com.runjing.resolve_excel_auto.mysql;
  * @modified By:
  * @project: resolve_excel_auto
  */
+@Configuration
 public class SqlConfiguration {
+
 }
