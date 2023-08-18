@@ -35,6 +35,14 @@ public class SqlSplicer {
     }
 
     /**
+     * 删除数据表，防止表重复
+     * @param tableName 表名称
+     * @return SQL
+     */
+    public static String dropTableSql(String tableName){
+        return "DROP TABLE IF EXISTS "+quotesHandle(transferPinYin(tableName));
+    }
+    /**
      * 反引号处理
      *
      * @param fieldName 字段名称

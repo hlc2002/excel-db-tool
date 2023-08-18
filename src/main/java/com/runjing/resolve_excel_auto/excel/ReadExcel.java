@@ -106,7 +106,7 @@ public class ReadExcel {
     /*获取构建表格数据属性SQL*/
     private static String switchCellDataSqlInfo(Cell dataCell) {
         return switch (dataCell.getCellType()) {
-            case NUMERIC -> " double default 0.00";
+            case NUMERIC -> " double default 0.00 ";
             case STRING -> " varchar(32) default null";
             case FORMULA -> " varchar default null";
             case BOOLEAN -> " tinyint(1) default 0";

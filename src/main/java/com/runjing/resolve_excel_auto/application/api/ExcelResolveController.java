@@ -31,7 +31,9 @@ public class ExcelResolveController {
     @RequestMapping("/upload")
     @ResponseBody
     public void uploadExcel(@RequestParam("fileName") MultipartFile file) {
-
+        String dropTableSql = SqlSplicer.dropTableSql(file.getName());
+        log.info("删表SQL：{}",dropTableSql);
+        service.executeSql(dropTableSql);
         List<ColumnEntity> excelColumnList = ReadExcel.getExcelColumnList(file);
         StringBuffer stringBuffer = SqlSplicer.spliceCreateTableSql(excelColumnList, file.getName());
         log.warn("建表SQL：{}", stringBuffer);
