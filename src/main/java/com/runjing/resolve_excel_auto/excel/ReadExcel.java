@@ -107,10 +107,10 @@ public class ReadExcel {
     private static String switchCellDataSqlInfo(Cell dataCell) {
         return switch (dataCell.getCellType()) {
             case NUMERIC -> " double default 0.00 ";
-            case STRING -> " varchar(32) default null";
+            case STRING -> " varchar(100) default null";
             case FORMULA -> " varchar default null";
             case BOOLEAN -> " tinyint(1) default 0";
-            default -> " varchar(16) default null";
+            default -> " varchar(64) default null";
         } + ",";
     }
 
