@@ -32,16 +32,22 @@ public class ExcelResolveController {
     @Resource
     private ExcelEntityService excelEntityService;
 
-    @RequestMapping("/upload")
+    @RequestMapping("/createAndInsert")
     @ResponseBody
     public void uploadExcel(@RequestParam("fileName") MultipartFile file) {
         excelEntityService.createTable(file);
         excelEntityService.insertEntity(file);
     }
 
-    @RequestMapping("/upload/insert")
+    @RequestMapping("/insert")
     @ResponseBody
     public void insertExcel(@RequestParam("fileName") MultipartFile file) {
         excelEntityService.insertEntity(file);
+    }
+
+    @RequestMapping("/drop")
+    @ResponseBody
+    public void delData(@RequestParam("fileName")String fileName){
+        excelEntityService.dropTable(fileName);
     }
 }

@@ -55,4 +55,11 @@ public class ExcelEntityServiceImpl implements ExcelEntityService {
             log.warn("不存在数据表：{}",file.getName());
         }
     }
+
+    @Override
+    public void dropTable(String fileName) {
+        String dropTableSql = SqlSplicer.dropTableSql(fileName);
+        log.info("删表SQL：{}",dropTableSql);
+        service.executeSql(dropTableSql);
+    }
 }

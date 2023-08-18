@@ -23,4 +23,10 @@ public interface ExcelEntityService {
      * @param file 文件
      */
     void insertEntity(MultipartFile file);
+
+    /**
+     * 删除数据表
+     * @param fileName 文件名
+     */
+    void dropTable(String fileName);
 }
