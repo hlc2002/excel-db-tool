@@ -21,10 +21,7 @@ import java.util.*;
  */
 @Slf4j
 public class ReadExcel {
-
-    private final static ColumnEntity COLUMN_ENTITY = new ColumnEntity();
-    private final static ValueEntity VALUE_ENTITY = new ValueEntity();
-    private final static Integer LIMIT_SCAN_NUM = 500 * 1000;
+    private static Integer LIMIT_SCAN_NUM = 500 * 1000;
 
     /**
      * 根据文件名读取Excel文件获取列信息列表
@@ -33,24 +30,12 @@ public class ReadExcel {
      * @return List<列实体>
      */
     public static List<ColumnEntity> getExcelColumnList(MultipartFile file) {
-        List<ColumnEntity> list = new LinkedList<>();
-        InputStream is = null;
-        try {
-            is = (FileInputStream) file.getInputStream();
-            Workbook workbook;
-            workbook = WorkbookFactory.create(is);
-            list = getExcelColumnList(workbook);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+        List<ColumnEntity> list;
+        Workbook workbook = getWorkbook(file);
+        if (Objects.isNull(workbook)) {
+            return new LinkedList<>();
         }
+        list = getExcelColumnList(workbook);
         return list;
     }
 
@@ -71,12 +56,12 @@ public class ReadExcel {
         }
         List<ColumnEntity> columnEntityList = new LinkedList<>();
         for (int i = 0; i < topRow.getPhysicalNumberOfCells(); i++) {
+            ColumnEntity columnEntity = new ColumnEntity();
             Cell nameCell = topRow.getCell(i);
             Cell typeRowCell = typeRow.getCell(i);
-            COLUMN_ENTITY.setColumnName(nameCell.getStringCellValue());
-            COLUMN_ENTITY.setColumnSqlInfo(switchCellDataSqlInfo(typeRowCell));
-            columnEntityList.add(COLUMN_ENTITY);
-            COLUMN_ENTITY.clear();
+            columnEntity.setColumnName(nameCell.getStringCellValue());
+            columnEntity.setColumnSqlInfo(switchCellDataSqlInfo(typeRowCell));
+            columnEntityList.add(columnEntity);
         }
         return columnEntityList;
     }
@@ -84,26 +69,29 @@ public class ReadExcel {
     /**
      * 获取行数与对应行得值SQL实体列表
      *
-     * @param workbook         工作薄对象
+     * @param file             工作薄文件
      * @param columnEntityList 列信息对象
      * @return map<行号 ， 行内每一个单元格得值SQL实体列表>
      */
-    public Map<Integer, List<ValueEntity>> getExcelRowDataMap(Workbook workbook, List<ColumnEntity> columnEntityList) {
+    public static Map<Integer, List<ValueEntity>> getExcelRowDataMap(MultipartFile file, List<ColumnEntity> columnEntityList) {
+        Workbook workbook = getWorkbook(file);
+        if (Objects.isNull(workbook)) {
+            return new HashMap<>();
+        }
         Sheet sheet = workbook.getSheetAt(0);
         int lastRowNum = sheet.getLastRowNum();
         Map<Integer, List<ValueEntity>> map = new HashMap<>();
-        List<ValueEntity> list = new LinkedList<>();
         if (lastRowNum <= LIMIT_SCAN_NUM) {
-            for (int i = 1; i < lastRowNum; i++) {
+            for (int i = 1; i <= lastRowNum; i++) {
                 Row row = sheet.getRow(i);
+                List<ValueEntity> list = new LinkedList<>();
                 for (int j = 0; j < row.getPhysicalNumberOfCells(); j++) {
-                    VALUE_ENTITY.setColumnName(columnEntityList.get(j).getColumnName());
-                    VALUE_ENTITY.setValueOfString(getValueSqlString(row.getCell(j)));
-                    list.add(VALUE_ENTITY);
-                    VALUE_ENTITY.clear();
+                    ValueEntity valueEntity = new ValueEntity();
+                    valueEntity.setColumnName(columnEntityList.get(j).getColumnName());
+                    valueEntity.setValueOfString(getValueSqlString(row.getCell(j)));
+                    list.add(valueEntity);
                 }
                 map.put(i, list);
-                list.clear();
             }
         }
         return map;
@@ -129,11 +117,11 @@ public class ReadExcel {
 
     /*获取单元格值SQL*/
     private static String getValueSqlString(Cell dataCell) {
-        return switch (dataCell.getCellType().getCode()) {
-            case 0 -> String.valueOf(dataCell.getNumericCellValue());
-            case 2 -> quotesHandle(dataCell.getStringCellValue());
-            case 3 -> quotesHandle(dataCell.getCellFormula());
-            case 4 -> transferBool(dataCell.getBooleanCellValue());
+        return switch (dataCell.getCellType()) {
+            case NUMERIC -> String.valueOf(dataCell.getNumericCellValue());
+            case STRING -> quotesHandle(dataCell.getStringCellValue());
+            case FORMULA -> quotesHandle(dataCell.getCellFormula());
+            case BOOLEAN -> transferBool(dataCell.getBooleanCellValue());
             default -> "null";
         };
     }
@@ -146,5 +134,24 @@ public class ReadExcel {
         return arg1 ? "0" : "1";
     }
 
-
+    private static Workbook getWorkbook(MultipartFile file) {
+        InputStream is = null;
+        try {
+            is = file.getInputStream();
+            Workbook workbook;
+            workbook = WorkbookFactory.create(is);
+            return workbook;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 }

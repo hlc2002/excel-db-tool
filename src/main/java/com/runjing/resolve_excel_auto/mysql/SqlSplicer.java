@@ -36,7 +36,7 @@ public class SqlSplicer {
      * 单引号处理
      *
      * @param fieldName 字段名称
-     * @return 被单引号包裹得字段名称
+     * @return 被反引号包裹得字段名称
      */
     private static String quotesHandle(String fieldName) {
         return "`" + fieldName + "`";
@@ -89,7 +89,7 @@ public class SqlSplicer {
      */
     private static String scanValueListToSql(String tableName, List<ValueEntity> valueEntityList) {
         StringBuilder stringBuffer = new StringBuilder();
-        stringBuffer.append("INSERT INTO TABLE").append(quotesHandle(transferPinYin(tableName)));
+        stringBuffer.append("INSERT INTO ").append(quotesHandle(transferPinYin(tableName)));
         stringBuffer.append(" VALUES( null,");
         for (ValueEntity element : valueEntityList) {
             if ((valueEntityList.indexOf(element) + 1) != valueEntityList.toArray().length) {
