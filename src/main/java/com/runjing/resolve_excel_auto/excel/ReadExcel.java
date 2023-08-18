@@ -2,12 +2,11 @@ package com.runjing.resolve_excel_auto.excel;
 
 import com.runjing.resolve_excel_auto.basic.ColumnEntity;
 import com.runjing.resolve_excel_auto.basic.ValueEntity;
+import com.runjing.resolve_excel_auto.util.LanguageUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -59,7 +58,7 @@ public class ReadExcel {
             ColumnEntity columnEntity = new ColumnEntity();
             Cell nameCell = topRow.getCell(i);
             Cell typeRowCell = typeRow.getCell(i);
-            columnEntity.setColumnName(nameCell.getStringCellValue());
+            columnEntity.setColumnName(transferPinYin(nameCell.getStringCellValue()));
             columnEntity.setColumnSqlInfo(switchCellDataSqlInfo(typeRowCell));
             columnEntityList.add(columnEntity);
         }
@@ -106,11 +105,11 @@ public class ReadExcel {
 
     /*获取构建表格数据属性SQL*/
     private static String switchCellDataSqlInfo(Cell dataCell) {
-        return switch (dataCell.getCellType().getCode()) {
-            case 0 -> " int default 0";
-            case 2 -> " varchar(32) default null";
-            case 3 -> " varchar default null";
-            case 4 -> " tinyint(1) default 0";
+        return switch (dataCell.getCellType()) {
+            case NUMERIC -> " int default 0";
+            case STRING -> " varchar(32) default null";
+            case FORMULA -> " varchar default null";
+            case BOOLEAN -> " tinyint(1) default 0";
             default -> " varchar(16) default null";
         } + ",";
     }
@@ -126,14 +125,32 @@ public class ReadExcel {
         };
     }
 
+    /**
+     * 单引号包裹字段
+     *
+     * @param fieldValue 字段值
+     * @return 包裹后字段串
+     */
     private static String quotesHandle(String fieldValue) {
         return "'" + fieldValue + "'";
     }
 
+    /**
+     * 布尔类型转换
+     *
+     * @param arg1 入参
+     * @return 转换值
+     */
     private static String transferBool(Boolean arg1) {
         return arg1 ? "0" : "1";
     }
 
+    /**
+     * 文件转换工作簿对象
+     *
+     * @param file excel文件
+     * @return 工作簿对象
+     */
     private static Workbook getWorkbook(MultipartFile file) {
         InputStream is = null;
         try {
@@ -153,5 +170,16 @@ public class ReadExcel {
                 }
             }
         }
+    }
+
+    /**
+     * 将汉字串转成拼音串
+     *
+     * @param columnChineseName 汉字字段名
+     * @return 字段拼音
+     */
+    private static String transferPinYin(String columnChineseName) {
+        /*转换中文为简体拼音*/
+        return LanguageUtils.convertChineseLan2PinYinAbbreviation(columnChineseName, LanguageUtils.CHINESE_CHAR_REG_SIMPLIFIED);
     }
 }

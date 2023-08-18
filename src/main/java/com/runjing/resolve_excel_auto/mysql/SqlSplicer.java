@@ -7,6 +7,7 @@ import com.runjing.resolve_excel_auto.util.LanguageUtils;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author : forestSpringH
@@ -16,6 +17,7 @@ import java.util.Map;
  * @project: resolve_excel_auto
  */
 public class SqlSplicer {
+
     /**
      * 拼接建表SQL
      *
@@ -33,7 +35,7 @@ public class SqlSplicer {
     }
 
     /**
-     * 单引号处理
+     * 反引号处理
      *
      * @param fieldName 字段名称
      * @return 被反引号包裹得字段名称
@@ -51,7 +53,7 @@ public class SqlSplicer {
     private static String scanColumnListToSql(List<ColumnEntity> columnEntityList) {
         StringBuilder fieldSql = new StringBuilder();
         for (ColumnEntity element : columnEntityList) {
-            fieldSql.append(quotesHandle(transferPinYin(element.getColumnName()))).append(element.getColumnSqlInfo());
+            fieldSql.append(quotesHandle(element.getColumnName())).append(element.getColumnSqlInfo());
         }
         return fieldSql.toString();
     }
@@ -68,16 +70,53 @@ public class SqlSplicer {
     }
 
     /**
-     * 拼接插值SQL
+     * 拼接插值SQL(单插入SQL集合)
      *
      * @param map       值实体列表Map
      * @param tableName 表名
      * @return 插值SQL
      */
-    public static StringBuffer spliceInsertValueSql(Map<Integer, List<ValueEntity>> map, String tableName) {
+    public static List<String> spliceInsertValueSql(Map<Integer, List<ValueEntity>> map, String tableName) {
+        List<String> sqlList = new LinkedList<>();
+        map.values().forEach(valueEntityList -> sqlList.add(scanValueListToSql(tableName, valueEntityList)));
+        return sqlList;
+    }
+
+    /**
+     * 拼接全插入SQL
+     *
+     * @param map              值实体列表Map
+     * @param columnEntityList 列信息实体列表
+     * @param tableName        表名
+     * @return 全量插入SQL
+     */
+    public static String spliceBatchInsertValueSql(Map<Integer, List<ValueEntity>> map, List<ColumnEntity> columnEntityList, String tableName) {
         StringBuffer stringBuffer = new StringBuffer();
-        map.values().forEach(valueEntityList -> stringBuffer.append(scanValueListToSql(tableName, valueEntityList)));
-        return stringBuffer;
+        stringBuffer.append("INSERT INTO ").append(quotesHandle(transferPinYin(tableName))).append(" ( `id`,");
+        columnEntityList.forEach(columnEntity -> {
+            stringBuffer.append(quotesHandle(transferPinYin(columnEntity.getColumnName())));
+            if (!Objects.equals(columnEntity, columnEntityList.get(columnEntityList.size() - 1))) {
+                stringBuffer.append(",");
+            } else {
+                stringBuffer.append(")");
+            }
+        });
+        map.values().forEach(valueEntityList -> {
+            stringBuffer.append(" SELECT ");
+            valueEntityList.forEach(valueEntity -> {
+                if (Objects.equals(valueEntity, valueEntityList.get(valueEntityList.size() - 1))) {
+                    stringBuffer.append(valueEntity.getValueOfString()).append(" ");
+                } else {
+                    stringBuffer.append(valueEntity.getValueOfString()).append(",");
+                }
+            });
+            if (Objects.equals(valueEntityList, map.values().stream().toList().get(map.size() - 1))) {
+                stringBuffer.append(";");
+            } else {
+                stringBuffer.append(" UNION ");
+            }
+        });
+        return stringBuffer.toString();
     }
 
     /**
@@ -102,6 +141,7 @@ public class SqlSplicer {
         return stringBuffer.toString();
     }
 
+    /*测试SQL拼接情况*/
     public static void main(String[] args) {
         List<ColumnEntity> columnEntityList = new LinkedList<>();
         ColumnEntity column1 = new ColumnEntity();

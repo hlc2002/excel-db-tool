@@ -36,13 +36,14 @@ public class ExcelResolveController {
         log.warn(excelColumnList.toString());
         StringBuffer stringBuffer = SqlSplicer.spliceCreateTableSql(excelColumnList, file.getName());
         log.warn("建表SQL：{}", stringBuffer);
-        service.executeSql(stringBuffer.toString());
-
+//        service.executeSql(stringBuffer.toString());
         Map<Integer, List<ValueEntity>> excelRowDataMap = ReadExcel.getExcelRowDataMap(file, excelColumnList);
         log.warn(excelRowDataMap.toString());
-        StringBuffer stringBuffer1 = SqlSplicer.spliceInsertValueSql(excelRowDataMap, file.getName());
+        List<String> stringBuffer1 = SqlSplicer.spliceInsertValueSql(excelRowDataMap, file.getName());
         log.warn("插值SQL：{}", stringBuffer1);
-        service.executeSql(stringBuffer1.toString());
-
+//        stringBuffer1.forEach(s -> service.executeSql(s));
+        String batchInsertValueSql = SqlSplicer.spliceBatchInsertValueSql(excelRowDataMap, excelColumnList, file.getName());
+        log.warn("全量插值SQL：{}", batchInsertValueSql);
+//        service.executeSql(batchInsertValueSql);
     }
 }
