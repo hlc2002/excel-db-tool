@@ -30,7 +30,7 @@ public class SqlDataSourceConfiguration {
         driverManagerDataSource.setUrl(sqlConfiguration.getUrl());
         driverManagerDataSource.setUsername(sqlConfiguration.getUserName());
         driverManagerDataSource.setPassword(sqlConfiguration.getPassword());
-        log.warn("开启自定义配置JDBC数据源：{}",sqlConfiguration.toString());
+        log.warn("扫描生成自定义配置JDBC数据源：{}",sqlConfiguration.toString());
         return driverManagerDataSource;
     }
 }
