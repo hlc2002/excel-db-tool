@@ -96,13 +96,6 @@ public class ReadExcel {
         return map;
     }
 
-    /**
-     * 判断是否Excel格式是否为2003
-     */
-    private static boolean isExcel2003(String filePath) {
-        return filePath.matches("^.+\\.(?i)(xls)$");
-    }
-
     /*获取构建表格数据属性SQL*/
     private static String switchCellDataSqlInfo(Cell dataCell) {
         return switch (dataCell.getCellType()) {
