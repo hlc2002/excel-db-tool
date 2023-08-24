@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * @author : forestSpringH
@@ -107,43 +106,6 @@ public class SqlSplicer implements SqlSpliceProvider{
             fieldSql.append(SqlSpliceStringUtil.quotesHandle(element.getColumnName())).append(element.getColumnSqlInfo());
         }
         return fieldSql.toString();
-    }
-
-    /**
-     * 拼接全插入SQL
-     *
-     * @param map              值实体列表Map
-     * @param columnEntityList 列信息实体列表
-     * @param tableName        表名
-     * @return 全量插入SQL
-     */
-    public static String spliceBatchInsertValueSql(Map<Integer, List<ValueEntity>> map, List<ColumnEntity> columnEntityList, String tableName) {
-        StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append("INSERT INTO ").append(SqlSpliceStringUtil.quotesHandle(SqlSpliceStringUtil.transferPinYin(tableName))).append(" ( `id`,");
-        columnEntityList.forEach(columnEntity -> {
-            stringBuffer.append(SqlSpliceStringUtil.quotesHandle(SqlSpliceStringUtil.transferPinYin(columnEntity.getColumnName())));
-            if (!Objects.equals(columnEntity, columnEntityList.get(columnEntityList.size() - 1))) {
-                stringBuffer.append(",");
-            } else {
-                stringBuffer.append(")");
-            }
-        });
-        map.values().forEach(valueEntityList -> {
-            stringBuffer.append(" SELECT ");
-            valueEntityList.forEach(valueEntity -> {
-                if (Objects.equals(valueEntity, valueEntityList.get(valueEntityList.size() - 1))) {
-                    stringBuffer.append(valueEntity.getValueOfString()).append(" ");
-                } else {
-                    stringBuffer.append(valueEntity.getValueOfString()).append(",");
-                }
-            });
-            if (Objects.equals(valueEntityList, map.values().stream().toList().get(map.size() - 1))) {
-                stringBuffer.append(";");
-            } else {
-                stringBuffer.append(" UNION ");
-            }
-        });
-        return stringBuffer.toString();
     }
 
 
