@@ -2,6 +2,7 @@ package com.runjing.resolve_excel_auto.mysql;
 
 import com.runjing.resolve_excel_auto.basic.ColumnEntity;
 import com.runjing.resolve_excel_auto.basic.ValueEntity;
+import com.runjing.resolve_excel_auto.mysql.service.SqlSpliceProvider;
 import com.runjing.resolve_excel_auto.util.SqlSpliceStringUtil;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +18,7 @@ import java.util.Map;
  * @project: resolve_excel_auto
  */
 @Service
-public class SqlSplicer implements SqlSpliceProvider{
+public class SqlSplicer implements SqlSpliceProvider {
 
     /**
      * 拼接建表SQL

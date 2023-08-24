@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
  * @project: resolve_excel_auto
  */
 @Slf4j
-public class LanguageUtils {
+public class LanguageUtil {
 
     /**
      * 定义输出格式

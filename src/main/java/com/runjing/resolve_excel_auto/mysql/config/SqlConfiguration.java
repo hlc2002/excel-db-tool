@@ -1,4 +1,4 @@
-package com.runjing.resolve_excel_auto.mysql;
+package com.runjing.resolve_excel_auto.mysql.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

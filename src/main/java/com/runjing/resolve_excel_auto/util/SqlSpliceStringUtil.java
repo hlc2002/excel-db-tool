@@ -27,6 +27,6 @@ public class SqlSpliceStringUtil {
      */
     public static String transferPinYin(String columnChineseName) {
         /*转换中文为简体拼音*/
-        return LanguageUtils.convertChineseLan2PinYinAbbreviation(columnChineseName, LanguageUtils.CHINESE_CHAR_REG_SIMPLIFIED);
+        return LanguageUtil.convertChineseLan2PinYinAbbreviation(columnChineseName, LanguageUtil.CHINESE_CHAR_REG_SIMPLIFIED);
     }
 }
