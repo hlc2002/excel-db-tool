@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
  * @project: resolve_excel_auto
  */
 @Service
-public class SqlDataService {
+public class SqlDataService{
     @Resource
     private JdbcTemplate jdbcTemplate;
 
