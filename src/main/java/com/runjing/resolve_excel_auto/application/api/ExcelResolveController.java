@@ -1,20 +1,10 @@
 package com.runjing.resolve_excel_auto.application.api;
 
 import com.runjing.resolve_excel_auto.application.service.instrcution.ExcelEntityService;
-import com.runjing.resolve_excel_auto.basic.ColumnEntity;
-import com.runjing.resolve_excel_auto.basic.ValueEntity;
-import com.runjing.resolve_excel_auto.excel.ReadExcel;
-import com.runjing.resolve_excel_auto.mysql.SqlDataService;
-import com.runjing.resolve_excel_auto.mysql.SqlSplicer;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.lang.ref.PhantomReference;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * @author : forestSpringH
@@ -50,4 +40,6 @@ public class ExcelResolveController {
     public void delData(@RequestParam("fileName")String fileName){
         excelEntityService.dropTable(fileName);
     }
+
+
 }

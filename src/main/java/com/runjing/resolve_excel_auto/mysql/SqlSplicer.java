@@ -2,7 +2,8 @@ package com.runjing.resolve_excel_auto.mysql;
 
 import com.runjing.resolve_excel_auto.basic.ColumnEntity;
 import com.runjing.resolve_excel_auto.basic.ValueEntity;
-import com.runjing.resolve_excel_auto.util.LanguageUtils;
+import com.runjing.resolve_excel_auto.util.SqlSpliceStringUtil;
+import org.springframework.stereotype.Service;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -16,7 +17,8 @@ import java.util.Objects;
  * @modified By:
  * @project: resolve_excel_auto
  */
-public class SqlSplicer {
+@Service
+public class SqlSplicer implements SqlSpliceProvider{
 
     /**
      * 拼接建表SQL
@@ -25,9 +27,10 @@ public class SqlSplicer {
      * @param tableName        表格名称
      * @return SQL
      */
-    public static StringBuffer spliceCreateTableSql(List<ColumnEntity> columnEntityList, String tableName) {
+    @Override
+    public StringBuffer spliceCreateTableSql(List<ColumnEntity> columnEntityList, String tableName) {
         StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append("CREATE TABLE ").append(quotesHandle(transferPinYin(tableName))).append(" ( `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自动主键',");
+        stringBuffer.append("CREATE TABLE ").append(SqlSpliceStringUtil.quotesHandle(SqlSpliceStringUtil.transferPinYin(tableName))).append(" ( `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自动主键',");
         /*扫描属性列表，填充建表SQL*/
         stringBuffer.append(scanColumnListToSql(columnEntityList));
         stringBuffer.append(" PRIMARY KEY (`id`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; ");
@@ -40,8 +43,9 @@ public class SqlSplicer {
      * @param tableName 表名称
      * @return SQL
      */
-    public static String dropTableSql(String tableName) {
-        return "DROP TABLE IF EXISTS " + quotesHandle(transferPinYin(tableName));
+    @Override
+    public  String dropTableSql(String tableName) {
+        return "DROP TABLE IF EXISTS " + SqlSpliceStringUtil.quotesHandle(SqlSpliceStringUtil.transferPinYin(tableName));
     }
 
     /**
@@ -49,18 +53,46 @@ public class SqlSplicer {
      * @param tableName 表名称
      * @return SQL
      */
-    public static String existsTableSql(String tableName) {
-        return "SELECT * FROM information_schema.TABLES WHERE TABLE_NAME = " + quotesHandle(transferPinYin(tableName));
+    @Override
+    public  String existsTableSql(String tableName) {
+        return "SELECT * FROM information_schema.TABLES WHERE TABLE_NAME = " + SqlSpliceStringUtil.quotesHandle(SqlSpliceStringUtil.transferPinYin(tableName));
     }
 
     /**
-     * 反引号处理
+     * 拼接插值SQL(单插入SQL集合)
      *
-     * @param fieldName 字段名称
-     * @return 被反引号包裹得字段名称
+     * @param map       值实体列表Map
+     * @param tableName 表名
+     * @return 插值SQL
      */
-    private static String quotesHandle(String fieldName) {
-        return "`" + fieldName + "`";
+    @Override
+    public  List<String> spliceInsertValueSql(Map<Integer, List<ValueEntity>> map, String tableName) {
+        List<String> sqlList = new LinkedList<>();
+        map.values().forEach(valueEntityList -> sqlList.add(scanValueListToSql(tableName, valueEntityList)));
+        return sqlList;
+    }
+
+
+    /**
+     * 拼接单一数据行值SQL
+     *
+     * @param tableName       表名
+     * @param valueEntityList 一行数据值列表
+     * @return SQL
+     */
+    private static String scanValueListToSql(String tableName, List<ValueEntity> valueEntityList) {
+        StringBuilder stringBuffer = new StringBuilder();
+        stringBuffer.append("INSERT INTO ").append(SqlSpliceStringUtil.quotesHandle(SqlSpliceStringUtil.transferPinYin(tableName)));
+        stringBuffer.append(" VALUES( null,");
+        for (ValueEntity element : valueEntityList) {
+            if ((valueEntityList.indexOf(element) + 1) != valueEntityList.toArray().length) {
+                stringBuffer.append(element.getValueOfString()).append(",");
+            } else {
+                stringBuffer.append(element.getValueOfString());
+            }
+        }
+        stringBuffer.append(");");
+        return stringBuffer.toString();
     }
 
     /**
@@ -72,33 +104,9 @@ public class SqlSplicer {
     private static String scanColumnListToSql(List<ColumnEntity> columnEntityList) {
         StringBuilder fieldSql = new StringBuilder();
         for (ColumnEntity element : columnEntityList) {
-            fieldSql.append(quotesHandle(element.getColumnName())).append(element.getColumnSqlInfo());
+            fieldSql.append(SqlSpliceStringUtil.quotesHandle(element.getColumnName())).append(element.getColumnSqlInfo());
         }
         return fieldSql.toString();
-    }
-
-    /**
-     * 将汉字串转成拼音串
-     *
-     * @param columnChineseName 汉字字段名
-     * @return 字段拼音
-     */
-    private static String transferPinYin(String columnChineseName) {
-        /*转换中文为简体拼音*/
-        return LanguageUtils.convertChineseLan2PinYinAbbreviation(columnChineseName, LanguageUtils.CHINESE_CHAR_REG_SIMPLIFIED);
-    }
-
-    /**
-     * 拼接插值SQL(单插入SQL集合)
-     *
-     * @param map       值实体列表Map
-     * @param tableName 表名
-     * @return 插值SQL
-     */
-    public static List<String> spliceInsertValueSql(Map<Integer, List<ValueEntity>> map, String tableName) {
-        List<String> sqlList = new LinkedList<>();
-        map.values().forEach(valueEntityList -> sqlList.add(scanValueListToSql(tableName, valueEntityList)));
-        return sqlList;
     }
 
     /**
@@ -111,9 +119,9 @@ public class SqlSplicer {
      */
     public static String spliceBatchInsertValueSql(Map<Integer, List<ValueEntity>> map, List<ColumnEntity> columnEntityList, String tableName) {
         StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append("INSERT INTO ").append(quotesHandle(transferPinYin(tableName))).append(" ( `id`,");
+        stringBuffer.append("INSERT INTO ").append(SqlSpliceStringUtil.quotesHandle(SqlSpliceStringUtil.transferPinYin(tableName))).append(" ( `id`,");
         columnEntityList.forEach(columnEntity -> {
-            stringBuffer.append(quotesHandle(transferPinYin(columnEntity.getColumnName())));
+            stringBuffer.append(SqlSpliceStringUtil.quotesHandle(SqlSpliceStringUtil.transferPinYin(columnEntity.getColumnName())));
             if (!Objects.equals(columnEntity, columnEntityList.get(columnEntityList.size() - 1))) {
                 stringBuffer.append(",");
             } else {
@@ -138,44 +146,5 @@ public class SqlSplicer {
         return stringBuffer.toString();
     }
 
-    /**
-     * 拼接单一数据行值SQL
-     *
-     * @param tableName       表名
-     * @param valueEntityList 一行数据值列表
-     * @return SQL
-     */
-    private static String scanValueListToSql(String tableName, List<ValueEntity> valueEntityList) {
-        StringBuilder stringBuffer = new StringBuilder();
-        stringBuffer.append("INSERT INTO ").append(quotesHandle(transferPinYin(tableName)));
-        stringBuffer.append(" VALUES( null,");
-        for (ValueEntity element : valueEntityList) {
-            if ((valueEntityList.indexOf(element) + 1) != valueEntityList.toArray().length) {
-                stringBuffer.append(element.getValueOfString()).append(",");
-            } else {
-                stringBuffer.append(element.getValueOfString());
-            }
-        }
-        stringBuffer.append(");");
-        return stringBuffer.toString();
-    }
 
-    /*测试SQL拼接情况*/
-    public static void main(String[] args) {
-        List<ColumnEntity> columnEntityList = new LinkedList<>();
-        ColumnEntity column1 = new ColumnEntity();
-        column1.setColumnName("品类名称");
-        column1.setColumnSqlInfo(" varchar(16) default null ,");
-        columnEntityList.add(column1);
-        String tableName = "数据表测试";
-        StringBuffer stringBuffer = spliceCreateTableSql(columnEntityList, tableName);
-        System.out.println(stringBuffer);
-        List<ValueEntity> valueEntityList = new LinkedList<>();
-        ValueEntity value1 = new ValueEntity();
-        value1.setColumnName("品类名称");
-        value1.setValueOfString("啤酒");
-        valueEntityList.add(value1);
-        String s = scanValueListToSql(tableName, valueEntityList);
-        System.out.println(s);
-    }
 }
