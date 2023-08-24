@@ -14,29 +14,29 @@ import java.util.Map;
  * @project: resolve_excel_auto
  */
 public  interface SqlSpliceProvider {
-    /**
+    /**拼接建表SQL
      * @param columnEntityList
      * @param tableName
-     * @return
+     * @return SQL
      */
     StringBuffer spliceCreateTableSql(List<ColumnEntity> columnEntityList, String tableName);
 
-    /**
+    /**拼接删表SQL
      * @param tableName
-     * @return
+     * @return SQL
      */
     String dropTableSql(String tableName);
 
-    /**
+    /**拼接判断表存在SQL
      * @param tableName
-     * @return
+     * @return SQL
      */
     String existsTableSql(String tableName);
 
-    /**
+    /**拼接插值SQL列表循环执行即可
      * @param map
      * @param tableName
-     * @return
+     * @return SQL
      */
     List<String> spliceInsertValueSql(Map<Integer, List<ValueEntity>> map, String tableName);
 }
