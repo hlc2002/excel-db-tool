@@ -1,6 +1,5 @@
 package com.runjing.resolve_excel_auto.mysql.config;
 
-import com.runjing.resolve_excel_auto.mysql.config.SqlConfiguration;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;

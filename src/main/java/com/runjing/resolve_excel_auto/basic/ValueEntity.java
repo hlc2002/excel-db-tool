@@ -10,7 +10,7 @@ import lombok.Data;
  * @project: resolve_excel_auto
  */
 @Data
-public class ValueEntity {
+public class ValueEntity{
     private String columnName;
     /*数据拼接到SQL上也是字符串类型*/
     private String valueOfString;

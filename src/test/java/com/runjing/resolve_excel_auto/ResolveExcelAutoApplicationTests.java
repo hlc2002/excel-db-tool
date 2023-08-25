@@ -20,4 +20,10 @@ class ResolveExcelAutoApplicationTests {
         service.executeSql(sql);
     }
 
+    @Test
+    public void testQueryJson(){
+        String sql = "SELECT * FROM test.runjing_sku LIMIT 10";
+        System.out.println(service.executeQuerySql(sql));
+    }
+
 }
