@@ -4,6 +4,7 @@ package com.runjing.resolve_excel_auto.config;
 import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -21,9 +22,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  */
 
 @Configuration
+@Slf4j
 public class WebMvcConfiguration implements WebMvcConfigurer , HandlerInterceptor {
     @Override
     public void addInterceptors(@NonNull InterceptorRegistry registry) {
+        registry.addInterceptor(this);
         WebMvcConfigurer.super.addInterceptors(registry);
     }
 
@@ -43,9 +46,11 @@ public class WebMvcConfiguration implements WebMvcConfigurer , HandlerIntercepto
         String tableName = request.getParameter("tableName");
         if (StringUtils.isNotEmpty(sql)){
             if (!sql.contains("test") || !tableName.contains("test")){
+                log.error("过滤非法请求：{}",sql);
                 return false;
             }
             if (sql.contains("DELETE") || sql.contains("delete") || sql.contains("UPDATE") || sql.contains("update")){
+                log.error("过滤非法请求：{}",sql);
                 return false;
             }
         }

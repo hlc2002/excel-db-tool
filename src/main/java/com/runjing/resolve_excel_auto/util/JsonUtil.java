@@ -14,6 +14,8 @@ import java.util.Map;
  */
 public class JsonUtil {
 
+    private final static String arg = "\"";
+
     /**
      * Map转成JSON字符串
      *
@@ -21,7 +23,7 @@ public class JsonUtil {
      * @return JSON
      */
     public static String mapToJsonString(Map<String, Object> map) {
-        return CollectionUtils.isEmpty(map) ? "" : JSONObject.toJSONString(map);
+        return CollectionUtils.isEmpty(map) ? "" : JSONObject.toJSONString(map).replace(arg,"'");
     }
 
 }
