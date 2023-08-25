@@ -4,7 +4,7 @@ import com.runjing.resolve_excel_auto.application.service.instrcution.ExcelEntit
 import com.runjing.resolve_excel_auto.basic.ColumnEntity;
 import com.runjing.resolve_excel_auto.basic.ValueEntity;
 import com.runjing.resolve_excel_auto.excel.service.ReadExcelService;
-import com.runjing.resolve_excel_auto.mysql.SqlDataService;
+import com.runjing.resolve_excel_auto.mysql.service.SqlDataProvider;
 import com.runjing.resolve_excel_auto.mysql.service.SqlSpliceProvider;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -25,11 +25,11 @@ import java.util.Objects;
  */
 @Service
 @Slf4j
-@ConditionalOnBean({SqlDataService.class,SqlSpliceProvider.class})
+@ConditionalOnBean({SqlDataProvider.class,SqlSpliceProvider.class})
 public class ExcelEntityServiceImpl implements ExcelEntityService {
 
     @Resource
-    private SqlDataService service;
+    private SqlDataProvider sqlDataProvider;
 
     @Resource
     private SqlSpliceProvider spliceProvider;
@@ -41,22 +41,22 @@ public class ExcelEntityServiceImpl implements ExcelEntityService {
     public void createTable(MultipartFile file) {
         String dropTableSql = spliceProvider.dropTableSql(file.getName());
         log.info("删表SQL：{}",dropTableSql);
-        service.executeSql(dropTableSql);
+        sqlDataProvider.executeSql(dropTableSql);
         List<ColumnEntity> excelColumnList = readExcelService.getExcelColumnList(file);
         StringBuffer stringBuffer = spliceProvider.spliceCreateTableSql(excelColumnList, file.getName());
         log.warn("建表SQL：{}", stringBuffer);
-        service.executeSql(stringBuffer.toString());
+        sqlDataProvider.executeSql(stringBuffer.toString());
     }
 
     @Override
     public void insertEntity(MultipartFile file) {
         String existsTableSql = spliceProvider.existsTableSql(file.getName());
-        Object aReturn = service.executeSqlAndGetReturn(existsTableSql);
+        Object aReturn = sqlDataProvider.executeSqlAndGetReturn(existsTableSql);
         if (Objects.nonNull(aReturn)) {
             List<ColumnEntity> excelColumnList = readExcelService.getExcelColumnList(file);
             Map<Integer, List<ValueEntity>> excelRowDataMap = readExcelService.getExcelRowDataMap(file, excelColumnList);
             List<String> stringBuffer1 = spliceProvider.spliceInsertValueSql(excelRowDataMap, file.getName());
-            stringBuffer1.forEach(s -> service.executeSql(s));
+            stringBuffer1.forEach(s -> sqlDataProvider.executeSql(s));
         }else{
             log.warn("不存在数据表：{}",file.getName());
         }
@@ -66,6 +66,6 @@ public class ExcelEntityServiceImpl implements ExcelEntityService {
     public void dropTable(String fileName) {
         String dropTableSql = spliceProvider.dropTableSql(fileName);
         log.info("删表SQL：{}",dropTableSql);
-        service.executeSql(dropTableSql);
+        sqlDataProvider.executeSql(dropTableSql);
     }
 }
