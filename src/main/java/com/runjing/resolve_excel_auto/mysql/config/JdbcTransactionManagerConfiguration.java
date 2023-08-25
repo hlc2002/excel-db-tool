@@ -1,6 +1,7 @@
 package com.runjing.resolve_excel_auto.mysql.config;
 
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +18,7 @@ import org.springframework.jdbc.support.JdbcTransactionManager;
  */
 @Configuration
 @ConditionalOnBean({SqlDataSourceConfiguration.class})
+@Slf4j
 public class JdbcTransactionManagerConfiguration {
 
     @Resource
@@ -25,6 +27,7 @@ public class JdbcTransactionManagerConfiguration {
     @Scope("singleton")
     public JdbcTransactionManager getJdbcTransactionManager(){
         JdbcTransactionManager jdbcTransactionManager = new JdbcTransactionManager();
+        log.info("开始配置JDBC事务管理者");
         jdbcTransactionManager.setDataSource(driverManagerDataSource);
         jdbcTransactionManager.setRollbackOnCommitFailure(true);
         jdbcTransactionManager.setFailEarlyOnGlobalRollbackOnly(true);

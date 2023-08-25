@@ -26,17 +26,17 @@ public class SqlDataService{
     @Resource
     private JdbcTemplate jdbcTemplate;
 
-    @Qualifier("TransactionTemplate")
+    @Qualifier("ReadCommittedTransactionTemplate")
     @Resource
     private TransactionTemplate transactionTemplate;
 
     public void executeSql(String sql){
-        log.warn("执行非查询操作SQL,开启事务执行{}",sql);
+        log.info("执行非查询操作SQL,开启事务执行{}",sql);
         transactionTemplate.executeWithoutResult(status -> {
             try{
                 jdbcTemplate.execute(sql);
             }catch (Exception e){
-                log.warn("事务异常，开启回滚：{}",e.getMessage());
+                log.error("事务异常，开启回滚：{}",e.getMessage());
                 status.setRollbackOnly();
             }
         });
