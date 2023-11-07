@@ -89,7 +89,7 @@ public class ReadExcel implements ReadExcelService {
         Row typeRow = dataSheet.getRow(1);
         if (topRow.getPhysicalNumberOfCells() != typeRow.getPhysicalNumberOfCells()) {
             log.error("数据表列行与数据行列数不一致！退出解析，请整理数据表格式！");
-            throw new RuntimeException("DataSheet is error: com.runjing.resolve_excel_auto.excel.ReadExcel.getExcelColumnList(org.apache.poi.ss.usermodel.Workbook)");
+            throw new RuntimeException("DataSheet is error: com.runjing.resolve_excel_auto.excel.ReadExcel.getExcelColumnList()");
         }
         List<ColumnEntity> columnEntityList = new LinkedList<>();
         for (int i = 0; i < topRow.getPhysicalNumberOfCells(); i++) {
